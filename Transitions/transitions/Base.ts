@@ -1,4 +1,4 @@
-import { frag } from "../../ShaderLib";
+import {frag} from '../../ShaderLib';
 
 export type Transition = string;
 
