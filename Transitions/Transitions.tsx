@@ -61,66 +61,58 @@ export const Transitions = () => {
   const progressLeft = useSharedValue(0);
   const progressRight = useSharedValue(0);
   const assets = useAssets();
-  const panRight = useMemo(
-    () =>
-      Gesture.Pan()
-        .activeOffsetX(5)
-        .onChange(pos => {
-          progressRight.value = clamp(
-            progressRight.value + pos.changeX / width,
-            0,
-            1,
-          );
-          console.log('onRight');
-        })
-        .onEnd(({velocityX}) => {
-          const dst = snapPoint(progressRight.value, velocityX / width, [0, 1]);
-          progressRight.value = withTiming(dst, {duration: 250}, () => {
-            if (dst === 1) {
-              offset.value -= 1;
-              progressRight.value = 0;
-            }
-          });
-        }),
-    [offset, progressRight],
-  );
-  const panLeft = useMemo(
-    () =>
-      Gesture.Pan()
-        .activeOffsetX(-5)
-        .onChange(pos => {
-          progressLeft.value = clamp(
-            progressLeft.value - pos.changeX / width,
-            0,
-            1,
-          );
-          console.log('onLeft');
-        })
-        .onEnd(({velocityX}) => {
-          const dst = snapPoint(progressLeft.value, -velocityX / width, [0, 1]);
-          progressLeft.value = withTiming(dst, {duration: 250}, () => {
-            if (dst === 1) {
-              offset.value += 1;
-              progressLeft.value = 0;
-            }
-          });
-        }),
-    [offset, progressLeft],
-  );
+  const panRight = Gesture.Pan()
+    .activeOffsetX(5)
+    .onChange(pos => {
+      progressRight.value = clamp(
+        progressRight.value + pos.changeX / width,
+        0,
+        1,
+      );
+      console.log('onRight');
+    })
+    .onEnd(({velocityX}) => {
+      const dst = snapPoint(progressRight.value, velocityX / width, [0, 1]);
+      progressRight.value = withTiming(dst, {duration: 250}, () => {
+        if (dst === 1) {
+          offset.value -= 1;
+          progressRight.value = 0;
+        }
+      });
+    });
+  const panLeft = Gesture.Pan()
+    .activeOffsetX(-5)
+    .onChange(pos => {
+      progressLeft.value = clamp(
+        progressLeft.value - pos.changeX / width,
+        0,
+        1,
+      );
+      console.log('onLeft');
+    })
+    .onEnd(({velocityX}) => {
+      const dst = snapPoint(progressLeft.value, -velocityX / width, [0, 1]);
+      progressLeft.value = withTiming(dst, {duration: 250}, () => {
+        if (dst === 1) {
+          offset.value += 1;
+          progressLeft.value = 0;
+        }
+      });
+    });
 
   const uniformsLeft = useDerivedValue(() => {
     return {
       progress: progressLeft.value,
       resolution: [width, height],
     };
-  });
+  }, [progressLeft.value]);
 
   const uniformsRight = useDerivedValue(() => {
     return {
       progress: progressRight.value,
       resolution: [width, height],
     };
-  });
+  }, [progressRight.value]);
 
   const transition1 = useDerivedValue(() => {
     return at(transitions, offset.value - 1);
@@ -146,13 +138,9 @@ export const Transitions = () => {
   return (
     <Animated.View style={{flex: 1}}>
       <GestureDetector gesture={Gesture.Race(panLeft, panRight)}>
-        <Canvas style={{flex: 1}}>
-          <Fill>
-            <Shader
-              source={
-                transition1! as Readonly<Animated.SharedValue<SkRuntimeEffect>>
-              }
-              uniforms={uniformsRight}>
+        <Animated.View style={{flex: 1}}>
+          <Canvas style={{flex: 1}}>
+            <Fill>
               <Shader
                 source={
                   transition2! as Readonly<
@@ -160,6 +148,26 @@ export const Transitions = () => {
                   >
                 }
                 uniforms={uniformsLeft}>
+                <Shader
+                  source={
+                    transition1! as Readonly<
+                      Animated.SharedValue<SkRuntimeEffect>
+                    >
+                  }
+                  uniforms={uniformsRight}>
+                  <ImageShader
+                    image={asset2}
+                    fit="cover"
+                    width={width}
+                    height={height}
+                  />
+                  <ImageShader
+                    image={asset3}
+                    fit="cover"
+                    width={width}
+                    height={height}
+                  />
+                </Shader>
                 <ImageShader
                   image={asset2}
                   fit="cover"
@@ -167,21 +175,15 @@ export const Transitions = () => {
                   height={height}
                 />
                 <ImageShader
-                  image={asset3}
+                  image={asset1}
                   fit="cover"
                   width={width}
                   height={height}
                 />
               </Shader>
-              <ImageShader
-                image={asset1}
-                fit="cover"
-                width={width}
-                height={height}
-              />
-            </Shader>
-          </Fill>
-        </Canvas>
+            </Fill>
+          </Canvas>
+        </Animated.View>
       </GestureDetector>
     </Animated.View>
   );
