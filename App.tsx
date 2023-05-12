@@ -1,5 +1,4 @@
-import 'react-native-gesture-handler';
-import 'react-native-reanimated';
+
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {StyleSheet} from 'react-native';
 import React from 'react';

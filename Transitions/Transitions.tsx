@@ -77,7 +77,7 @@ export const Transitions = () => {
           const dst = snapPoint(progressRight.value, velocityX / width, [0, 1]);
           progressRight.value = withTiming(dst, {duration: 250}, () => {
             if (dst === 1) {
-              offset.value = offset.value - 1;
+              offset.value -= 1;
               progressRight.value = 0;
             }
           });
@@ -100,7 +100,7 @@ export const Transitions = () => {
           const dst = snapPoint(progressLeft.value, -velocityX / width, [0, 1]);
           progressLeft.value = withTiming(dst, {duration: 250}, () => {
             if (dst === 1) {
-              offset.value = offset.value + 1;
+              offset.value += 1;
               progressLeft.value = 0;
             }
           });
